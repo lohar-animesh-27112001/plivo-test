@@ -1,0 +1,99 @@
+
+AI/ML Assignment Plivo - IIT Delhi
+Problem Statement — Ultra‑Fast Speech To Text Post‑Processor 
+
+Objective:
+
+Build and justify an ultra‑fast text post‑processor that corrects typical ASR errors in short, English utterances with Indian accents especially emails, numbers (Indian formats), Indian names, and basic punctuation under a strict latency budget.
+
+Constraints:
+
+Latency target: end‑to‑end p95 ≤ 30 ms per utterance on CPU for the post‑processor (rules + ranker).
+
+Scope: You will not train a large model. Use lightweight rules plus a small learned component (DistilBERT masked LM ranker in ONNX INT8 is provided). You may add small utilities but keep the pipeline fast.
+
+What’s provided:
+
+Starter repo (Zip file link below) with:
+
+data/noisy_transcripts.jsonl (~10 lines) and data/gold.jsonl (references) - You will need to add more data points, ~80 lines. 
+
+data/names_lexicon.txt, data/misspell_map.json.
+
+Stage 1 (rules): candidate generation for emails, numbers, ₹ currency formatting, and names.
+
+Stage 2 (ranker): DistilBERT masked‑LM pseudo‑likelihood scorer with ONNX INT8 path and PyTorch fallback.
+
+Metrics: WER, CER, Punctuation F1, Email accuracy, Number accuracy, Name F1.
+
+Scripts:
+
+score.sh → export & quantize the model → run pipeline → evaluate → measure latency.
+
+run_pipeline.py → produces out/corrected.jsonl.
+
+evaluate.py → prints metrics vs gold.
+
+measure_latency.py → prints p50/p95 latency (100 runs, 10 warmups).
+
+Your tasks:
+
+Install deps and run the baseline:
+    >> pip install -r requirements.txt
+
+              >> bash score.sh
+
+Improve the post‑processor while keeping p95 ≤ 30 ms. You may:
+
+Strengthen Stage 1 rules in src/rules.py (email tokenization, “double nine”, “oh”→0, ₹ with Indian digit grouping, fuzzy name correction, minimal sentence‑final punctuation).
+
+Refine Stage 2 ranking in src/ranker_onnx.py (e.g., token length caps, short‑circuiting when a candidate has a valid email/number, tweak pseudo‑likelihood masking strategy).
+
+Demonstrate measurable gains on at least two of:
+
+WER or CER
+
+Email accuracy
+
+Number accuracy
+
+Name F1
+
+Punctuation F1
+
+Show latency results (p50 and p95) with measure_latency.py.
+
+Record a short Loom (≤5 min) describing your changes, results, trade‑offs, and one “next step” you’d ship.
+
+Deliverables.
+
+Runnable code (or a Colab) that we can execute via: bash score.sh
+
+Share the output produced by your pipeline out/corrected.jsonl
+
+Metric table (baseline vs yours) and latency numbers.
+
+Loom link (≤5 min) explaining approach, ablations, results, and what you would productionize next.
+
+Rules & allowances.
+
+You may consult documentation and the web (open book).
+
+Keep dependencies modest (already listed in requirements.txt).
+
+You may not train heavy models; stick to light‑weight tweaks that finish comfortably within the timebox and latency budget.
+
+If you add heuristics or thresholds, please explain them briefly.
+
+
+Submission Checklist
+I ran bash score.sh end‑to‑end successfully.
+
+I improved at least two of the target metrics and recorded the before/after values.
+
+I measured and reported p50/p95 latency with p95 ≤ 30 ms.
+
+I included a short Loom (≤5 min) explaining approach, ablation, and next steps.
+
+My repo clearly documents any small knobs I tuned (e.g., max_length, candidate cap). 
+
